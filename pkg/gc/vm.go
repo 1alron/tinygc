@@ -9,7 +9,7 @@ import "unsafe"
 const StackMax = 256
 
 type VM struct {
-	Stack     [StackMax]*Object
+	Stack     [StackMax]Object
 	StackSize int
 }
 
@@ -27,7 +27,7 @@ func FreeVM(vm *VM) {
 	C.free(unsafe.Pointer(vm))
 }
 
-func (vm *VM) Push(value *Object) {
+func (vm *VM) Push(value Object) {
 	if vm.StackSize >= StackMax {
 		panic("VM's stack overflow!")
 	}
@@ -35,7 +35,7 @@ func (vm *VM) Push(value *Object) {
 	vm.StackSize++
 }
 
-func (vm *VM) Pop() *Object {
+func (vm *VM) Pop() Object {
 	if vm.StackSize <= 0 {
 		panic("VM's stack underflow!")
 	}
@@ -48,14 +48,14 @@ func PushInt(vm *VM, intValue int) {
 	obj := NewObject(vm, ObjInt)
 	intObj := obj.(*IntObject)
 	intObj.Value = intValue
-	vm.Push(&obj)
+	vm.Push(obj)
 }
 
 func PushPair(vm *VM) Object {
 	obj := NewObject(vm, ObjPair)
 	pairObj := obj.(*PairObject)
-	pairObj.Tail = *vm.Pop()
-	pairObj.Head = *vm.Pop()
-	vm.Push(&obj)
+	pairObj.Tail = vm.Pop()
+	pairObj.Head = vm.Pop()
+	vm.Push(obj)
 	return obj
 }
