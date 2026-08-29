@@ -6,11 +6,19 @@ package gc
 import "C"
 import "unsafe"
 
-const StackMax = 256
+const (
+	StackMax      = 256
+	InitObjNumMax = 8
+)
 
 type VM struct {
 	Stack     [StackMax]Object
 	StackSize int
+
+	FirstObject Object
+
+	NumObjects int
+	MaxObjects int
 }
 
 func NewVM() *VM {
@@ -19,7 +27,7 @@ func NewVM() *VM {
 		panic("Failed to allocate memory for VM!")
 	}
 	vm := (*VM)(ptr)
-	vm.StackSize = 0
+	vm.MaxObjects = InitObjNumMax
 	return vm
 }
 
