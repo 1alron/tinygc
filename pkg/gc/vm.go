@@ -43,3 +43,19 @@ func (vm *VM) Pop() *Object {
 	vm.StackSize--
 	return res
 }
+
+func PushInt(vm *VM, intValue int) {
+	obj := NewObject(vm, ObjInt)
+	intObj := obj.(*IntObject)
+	intObj.Value = intValue
+	vm.Push(&obj)
+}
+
+func PushPair(vm *VM) Object {
+	obj := NewObject(vm, ObjPair)
+	pairObj := obj.(*PairObject)
+	pairObj.Tail = *vm.Pop()
+	pairObj.Head = *vm.Pop()
+	vm.Push(&obj)
+	return obj
+}
