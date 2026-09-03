@@ -24,7 +24,7 @@ type VM struct {
 func NewVM() *VM {
 	ptr := C.malloc(C.size_t(unsafe.Sizeof(VM{})))
 	if ptr == nil {
-		panic("Failed to allocate memory for VM!")
+		panic("failed to allocate memory for VM")
 	}
 	vm := (*VM)(ptr)
 	vm.NumObjects = 0
@@ -38,35 +38,35 @@ func FreeVM(vm *VM) {
 	C.free(unsafe.Pointer(vm))
 }
 
-func (vm *VM) Push(value Object) {
-	if vm.StackSize >= StackMax {
-		panic("VM's stack overflow!")
-	}
-	vm.Stack[vm.StackSize] = value
-	vm.StackSize++
-}
-
 func (vm *VM) Pop() Object {
 	if vm.StackSize <= 0 {
-		panic("VM's stack underflow!")
+		panic("VM's stack underflow")
 	}
 	res := vm.Stack[vm.StackSize-1]
 	vm.StackSize--
 	return res
 }
 
-func PushInt(vm *VM, intValue int) {
-	obj := NewObject(vm, ObjInt)
+func (vm *VM) PushInt(intValue int) {
+	obj := newObject(vm, ObjInt)
 	intObj := obj.(*IntObject)
 	intObj.Value = intValue
-	vm.Push(obj)
+	vm.push(obj)
 }
 
-func PushPair(vm *VM) Object {
-	obj := NewObject(vm, ObjPair)
+func (vm *VM) PushPair() Object {
+	obj := newObject(vm, ObjPair)
 	pairObj := obj.(*PairObject)
 	pairObj.Tail = vm.Pop()
 	pairObj.Head = vm.Pop()
-	vm.Push(obj)
+	vm.push(obj)
 	return obj
+}
+
+func (vm *VM) push(value Object) {
+	if vm.StackSize >= StackMax {
+		panic("VM's stack overflow")
+	}
+	vm.Stack[vm.StackSize] = value
+	vm.StackSize++
 }

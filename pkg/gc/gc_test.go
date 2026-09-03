@@ -9,12 +9,12 @@ func TestPreservingObjects(t *testing.T) {
 
 	vm := NewVM()
 
-	PushInt(vm, 1)
-	PushInt(vm, 2)
+	vm.PushInt(1)
+	vm.PushInt(2)
 
 	MarkAndSweep(vm)
 	if vm.NumObjects != preservedObjectsAmount {
-		t.Errorf("Expected %d preserved objects, got %d.\n", preservedObjectsAmount, vm.NumObjects)
+		t.Errorf("expected %d preserved objects, got %d.\n", preservedObjectsAmount, vm.NumObjects)
 	}
 
 	FreeVM(vm)
@@ -23,15 +23,15 @@ func TestPreservingObjects(t *testing.T) {
 func TestCollectingUnreachedObjects(t *testing.T) {
 	vm := NewVM()
 
-	PushInt(vm, 1)
-	PushInt(vm, 2)
+	vm.PushInt(1)
+	vm.PushInt(2)
 
 	vm.Pop()
 	vm.Pop()
 
 	MarkAndSweep(vm)
 	if vm.NumObjects != 0 {
-		t.Errorf("Expected no currently allocated objects, got %d.\n", vm.NumObjects)
+		t.Errorf("expected no currently allocated objects, got %d\n", vm.NumObjects)
 	}
 
 	FreeVM(vm)
@@ -42,21 +42,21 @@ func TestReachingNestedObjects(t *testing.T) {
 
 	vm := NewVM()
 
-	PushInt(vm, 1)
-	PushInt(vm, 2)
+	vm.PushInt(1)
+	vm.PushInt(2)
 
-	PushPair(vm)
+	vm.PushPair()
 
-	PushInt(vm, 3)
-	PushInt(vm, 4)
+	vm.PushInt(3)
+	vm.PushInt(4)
 
-	PushPair(vm)
-	PushPair(vm)
+	vm.PushPair()
+	vm.PushPair()
 
 	MarkAndSweep(vm)
 
 	if vm.NumObjects != reachedObjects {
-		t.Errorf("Expected %d reached objects, got %d.\n", reachedObjects, vm.NumObjects)
+		t.Errorf("expected %d reached objects, got %d\n", reachedObjects, vm.NumObjects)
 	}
 
 	FreeVM(vm)
@@ -64,18 +64,18 @@ func TestReachingNestedObjects(t *testing.T) {
 
 func TestHandlingCycles(t *testing.T) {
 	const reachedObjects = 4
-	
+
 	vm := NewVM()
 
-	PushInt(vm, 1)
-	PushInt(vm, 2)
-	
-	firstPair := PushPair(vm)
+	vm.PushInt(1)
+	vm.PushInt(2)
 
-	PushInt(vm, 3)
-	PushInt(vm, 4)
+	firstPair := vm.PushPair()
 
-	secondPair := PushPair(vm)
+	vm.PushInt(3)
+	vm.PushInt(4)
+
+	secondPair := vm.PushPair()
 
 	firstPair.(*PairObject).Tail = secondPair
 	secondPair.(*PairObject).Tail = firstPair
@@ -83,7 +83,7 @@ func TestHandlingCycles(t *testing.T) {
 	MarkAndSweep(vm)
 
 	if vm.NumObjects != reachedObjects {
-		t.Errorf("Expected %d reached objects, got %d.\n", reachedObjects, vm.NumObjects)
+		t.Errorf("expected %d reached objects, got %d\n", reachedObjects, vm.NumObjects)
 	}
 
 	FreeVM(vm)
@@ -94,7 +94,7 @@ func BenchmarkPushPop(b *testing.B) {
 
 	for i := range b.N {
 		for range 20 {
-			PushInt(vm, i)
+			vm.PushInt(i)
 		}
 
 		for range 20 {

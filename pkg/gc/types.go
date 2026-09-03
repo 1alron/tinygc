@@ -59,12 +59,30 @@ func (o *PairObject) GetNext() Object     { return o.Next }
 func (o *PairObject) SetNext(next Object) { o.Next = next }
 func (o *PairObject) Free()               { C.free(unsafe.Pointer(o)) }
 
-func NewObject(vm *VM, ot ObjectType) Object {
+func newObject(vm *VM, ot ObjectType) Object {
+	if vm.NumObjects == vm.MaxObjects {
+		MarkAndSweep(vm)
+	}
+
 	var obj Object
-	if ot == ObjInt {
-		obj = (*IntObject)(C.malloc(C.size_t(unsafe.Sizeof(IntObject{}))))
-	} else {
-		obj = (*PairObject)(C.malloc(C.size_t(unsafe.Sizeof(PairObject{}))))
+
+	switch ot {
+	case ObjInt:
+		ptr := C.malloc(C.size_t(unsafe.Sizeof(IntObject{})))
+		if ptr == nil {
+			panic("failed to allocate memory for IntObject")
+		}
+		obj = (*IntObject)(ptr)
+
+	case ObjPair:
+		ptr := C.malloc(C.size_t(unsafe.Sizeof(PairObject{})))
+		if ptr == nil {
+			panic("failed to allocate memory for PairObject")
+		}
+		obj = (*PairObject)(ptr)
+
+	default:
+		panic("unknown object type")
 	}
 	obj.SetNext(vm.FirstObject)
 	vm.FirstObject = obj
