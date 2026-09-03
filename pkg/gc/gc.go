@@ -24,7 +24,7 @@ func Sweep(vm *VM) {
 		if !(*obj).IsMarked() {
 			unreached := *obj
 			*obj = unreached.GetNext()
-			(*obj).Free()
+			unreached.Free()
 			vm.NumObjects--
 		} else {
 			(*obj).Unmark()
@@ -34,7 +34,7 @@ func Sweep(vm *VM) {
 	}
 }
 
-func gc(vm *VM) {
+func MarkAndSweep(vm *VM) {
 	MarkAll(vm)
 	Sweep(vm)
 
