@@ -27,6 +27,9 @@ func NewVM() *VM {
 		panic("Failed to allocate memory for VM!")
 	}
 	vm := (*VM)(ptr)
+	vm.NumObjects = 0
+	vm.StackSize = 0
+	vm.FirstObject = nil
 	vm.MaxObjects = InitObjNumMax
 	return vm
 }
